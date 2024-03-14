@@ -41,7 +41,7 @@ echo hello
 
 ![sys_write](./pic/sys_write.png)
 
-`sys_write`实际地将用户侧输入的参数`"hello"`字符串打印在标准在标准输出(此时会调用`argint`等函数读取参数):
+`sys_write`实际地将用户侧输入的参数`"hello"`字符串打印在标准输出(此时会调用`argint`等函数读取参数):
 
 ![xv6c4-4](./pic/xv6c4-4.png)
 
