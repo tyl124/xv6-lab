@@ -264,7 +264,68 @@ fork(void)
 
 顺利通过。
 
+## Sysinfo
 
+有了上一部分的基础，这一部分就很简单了，主要的代码有以下几部分:
+
+1. 获得空闲进程数:
+```c
+// kernel/proc.c
+...
+uint64 getFreeProc(void){
+	struct proc *p;
+	uint64 num = 0;
+	for(p = proc; p < &proc[NPROC]; p++){
+		if(p->state != UNUSED)
+			num++;
+	}
+	return num;
+}
+...
+```
+
+2. 获得空闲内存大小:
+```c
+// kernel/kalloc.c
+uint64 getFreeMem(void){
+	struct run *r;
+	uint64 memSize = 0;
+	for(r = kmem.freelist; r; r = r->next){
+		memSize += PGSIZE;
+	}
+	return memSize;
+}
+```
+
+3. 添加`sys_sysinfo`具体实现:
+```c
+// kernel/sysproc.c
+uint64
+sys_sysinfo(void){
+	struct proc *cur_proc = myproc();
+	uint64 p;
+	if(argaddr(0, &p) < 0)
+		return -1;
+	struct sysinfo info;
+	info.freemem = getFreeMem();
+	info.nproc = getFreeProc();
+	if(copyout(cur_proc->pagetable, p, (char *)&info, sizeof info ) < 0)
+		return -1;
+	return 0;
+}
+```
+
+除了主要代码的实现，有一些地方需要注意以下:
+- `sysinfo`结构体以及`sysinfo`函数原型的定义:
+```c
+struct sysinfo;
+int sysinfo(struct sysinfo *);
+```
+- 在完成了两个函数`getFreeMem(), getFreeProc()`函数代码编写后，需要在`kernel/defs.h`中添加对应的函数声明，否则会出现编译错误.
+
+完成之后进行测试:
+
+![psysinfo](./pic/psysinfo.png)
 
 
 
